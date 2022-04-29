@@ -5,6 +5,7 @@ import { Course } from '../http/graphql/models/course';
 
 interface CreateCourseParams {
   title: string;
+  slug?: string;
 }
 
 @Injectable()
@@ -21,9 +22,16 @@ export class CoursesService {
     });
   }
 
-  async createCourse({ title }: CreateCourseParams): Promise<Course> {
-    const slug = slugify(title, { lower: true });
+  async findBySlug(slug: string): Promise<Course> {
+    return this.prisma.course.findUnique({
+      where: { slug },
+    });
+  }
 
+  async createCourse({
+    title,
+    slug = slugify(title, { lower: true }),
+  }: CreateCourseParams): Promise<Course> {
     const courseAlreadyExists = await this.prisma.course.findUnique({
       where: { slug },
     });
